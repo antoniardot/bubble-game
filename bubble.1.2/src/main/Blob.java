@@ -7,6 +7,7 @@ public class Blob extends MovableObject{
 	float speed;
 	int direction;
 	
+	//bla
 	
 	public Blob(PApplet parent) {
 		super(parent,0,0,0);
