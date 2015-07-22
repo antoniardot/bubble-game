@@ -17,11 +17,14 @@ public class OSCHandler {
 	HashMap<Integer, TspsPerson> _personList;
 	int _numPeople;
 	
+	ArrayList<Bubble> _bubbleList;
+	
 	public OSCHandler(PApplet parent){
 		
 		_p = parent;
 		_numPeople = 0;
 		_personList = new HashMap<Integer, TspsPerson>();
+		_bubbleList = new ArrayList<Bubble>();
 		
 		// start oscP5, telling it to listen for incoming messages at port 5001 */
 		oscP5 = new OscP5(this,12000); 
@@ -117,8 +120,19 @@ public class OSCHandler {
 	 * 
 	 * @return a List of Persons, that have been detected
 	 */
-	public Collection<TspsPerson> getPeopleList() {
-		return  _personList.values();
+	public ArrayList<TspsPerson> getPeopleList() {
+		ArrayList<TspsPerson> valuesList = new ArrayList<TspsPerson>(_personList.values());
+		return  valuesList;
+	}
+	
+	public ArrayList<Bubble> getBubbleList() {
+		
+		_bubbleList = new ArrayList<Bubble>();
+		
+		for(TspsPerson p: getPeopleList()) {
+			_bubbleList.add(p._bubble);
+		}
+		return _bubbleList;
 	}
 	
 	

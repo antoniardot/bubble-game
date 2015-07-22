@@ -45,17 +45,25 @@ public class Bubble extends MovableObject{
 		_centroid.y = yco * _parent.height;
 	}
 	
+	void updateOrignialCoordinates(float xco, float yco) {
+		_centroid.x = xco;
+		_centroid.y = yco;
+		
+	}
+	
 	
 	void display() {
-		
-		
 		//calulate radius which is growing and shrinking slightly
 //		float d1 = (_parent.sin(angle)*_radius)* 0.3f  + _radius*2;
 //		_parent.ellipse(_centroid.x, _centroid.y, d1, d1);
+		_parent.noFill();
+		_parent.strokeWeight(4);
+		_parent.stroke(0,0, 0);
 		_parent.ellipse(_centroid.x, _centroid.y, _radius*2, _radius*2);
 		
 		angle += 0.03;
 	}
+	
 	
 	
 }
