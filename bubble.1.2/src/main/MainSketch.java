@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import old.TspsPerson;
+
 public class MainSketch extends PApplet {
 
 	// declare global variables
@@ -22,16 +24,30 @@ public class MainSketch extends PApplet {
 	
 	byte currentState;
 	
+	
+	PImage img;
+	PImage img2;
+
 	//elements of the game
 	Collection<TspsPerson> _people; //the players, should only be two
 	
-	static int _numberBlobs = 50;
-	ArrayList<Blob> _blobs;
 	ArrayList<MovableObject> _allMovableObjects;
-	ArrayList<Bubble> _bubbles;
+
+	static int _numberBlobs = 20;
+	ArrayList<Blob> _blobs;
 	
-	Bubble defaultBubble;
-	PImage img;
+	static int _numberIslandSteps = 10;
+	IslandMaker _islandMaker;
+	
+	
+	BubbleList _bubs;
+	
+	//FOR TESTING
+	Bubble defaultBubble1;
+	Bubble defaultBubble2;
+	MouseWheelEventListener wheelListener;
+	
+	
 
 	
 	
@@ -44,40 +60,48 @@ public class MainSketch extends PApplet {
 	  public void setup() {
 
 		//initialize window
-		//size(1200,800);
-	    size(580,420);
+		size(1000,700);
+//	    size(580,420);
 	    background(0,0,0);
-	    img = loadImage("/Users/Bruno/projects/IGITTIGIT/bubble.1.2/img/forest.jpg");
-	    
-	    // initialize Receiver
-	    tspsReceiver= null;
-	    receiver = new OSCHandler(this);
-//	    int x = receiver.getNumPeople();
-//	    println("Number of people at beginning: " + x);
-	    
-	    
+	    img = loadImage("/Users/Bruno/projects/IGITTIGIT/bubble.1.2/img/forest_bg.png");
+	    img2 = loadImage("/Users/Bruno/projects/IGITTIGIT/bubble.1.2/img/forest2.png");
 	    
 	    //initialize elements
 	    _allMovableObjects = new ArrayList<MovableObject>(); //this list can be configured by the OSCHandler! bad solution
-	    _blobs = new ArrayList<Blob>();
+
 	    //intialize Blobs
+	    _blobs = new ArrayList<Blob>();
 	    for (int i = 0; i < _numberBlobs; i++) {
 	    	Blob b = new Blob(this, i);
 	        _blobs.add(b);
 	        _allMovableObjects.add(_blobs.get(i));
 	      }
 	    
+	    //intialise islandMaker
+	    _islandMaker = new IslandMaker(this);
 	    
 	    //the list of Bubbles
-	    _bubbles = new ArrayList<Bubble>();
+	    _bubs = new BubbleList();
 	    
 	    //only for testing
-	    defaultBubble = new Bubble(this, 0.4f , 0.5f);
-	    _bubbles.add(defaultBubble);
-	    defaultBubble.display();
+	    defaultBubble1 = new Bubble(this, 0, 0, 0.4f , 0.5f);
+	    defaultBubble2 = new Bubble(this,0 ,0, 0.7f, 0.8f);
+	    _bubs.add(defaultBubble1);
+	    _bubs.add(defaultBubble2);
+	    
 	    
 	    //set the state
 	    currentState = STATE_FLYINGBLOBS_QUEST;
+//	    currentState = STATE_ISLAND_QUEST;
+	    
+	    
+	    
+	    // initialize Receiver and other listeners
+	    tspsReceiver= null;
+	    receiver = new OSCHandler(this, _bubs);
+//	    int x = receiver.getNumPeople();
+//	    println("Number of people at beginning: " + x);
+	    wheelListener = new MouseWheelEventListener(this,_bubs);
 	    
 	  }
 
@@ -94,13 +118,12 @@ public class MainSketch extends PApplet {
 		  
 		  //get the info of the players
 //		  _people = new ArrayList<TspsPerson>(receiver.getPeopleList());
-		  _bubbles = new ArrayList<Bubble>(receiver.getBubbleList());
-		  _bubbles.add(defaultBubble);
+//		  _bubbles = new ArrayList<Bubble>(receiver.getBubbleList());
+//		  HandleControllerInput(_bubbles);
+//		  _bubbles.add(defaultBubble1);
+//		  _bubbles.add(defaultBubble2);
 		  
 		  
-		  
-		  //get the info of the controller
-		  // ...jaja kommt ja noch
 		  
 		  switch(currentState) {
 		  case STATE_STARTGAME:
@@ -133,11 +156,27 @@ public class MainSketch extends PApplet {
 //	    }
 	   
 	    if(mousePressed) {
-	    	fill(200,200,200);
-	    	ellipse(mouseX,mouseY,10,10);
-	    	defaultBubble.updateOrignialCoordinates(mouseX, mouseY);;
+//	    	fill(200,200,200);
+//	    	ellipse(mouseX,mouseY,10,10);
+	    	defaultBubble1.updateOrignialCoordinates(mouseX, mouseY);;
 	    }
-//	    defaultBubble.display();
+	    if(keyPressed == true && key == CODED) {
+	    	if(keyCode == RIGHT){
+	    		defaultBubble2._centroid.x += 3; 
+	    	}
+	    	else if (keyCode == LEFT) {
+	    		defaultBubble2._centroid.x -= 3; 
+	    		
+	    	}
+	    	else if (keyCode == UP) {
+	    		defaultBubble2._centroid.y -= 3; 
+	    	}
+	    	else if (keyCode == DOWN) {
+	    		defaultBubble2._centroid.y += 3; 
+	    		
+	    	}
+	    }
+	    
 	  
 	  }//end draw loop
 	  
@@ -159,7 +198,7 @@ public class MainSketch extends PApplet {
 	   */
 	  private void loopBlobsState(){
 		  background(255,255,255); //make everything blank to render it
-//			image(img,0,0);
+			image(img,0,0);
 		    
 		  //if all the blobs have been popped change the state  
 		  if(_blobs.isEmpty()){
@@ -175,8 +214,19 @@ public class MainSketch extends PApplet {
 		      
 		      boolean popped = false;
 		      //handle collision with bubbles
-		      for(Bubble b: _bubbles){
-		    	  if (_blobs.get(i).collidesWith(b)){
+//		      for(Bubble b: _bubbles){
+//		    	  if (_blobs.get(i).collidesWith(b)){
+//						//if they collide with a bubble, let them pop
+//							_blobs.get(i).pop();
+//							_blobs.remove(i);
+//							popped = true;
+//							break;
+//					}  
+//		      }
+		      
+		      
+		      for(int j =0; j < _bubs.size(); j++){
+		    	  if (_blobs.get(i).collidesWith(_bubs.get(j))){
 						//if they collide with a bubble, let them pop
 							_blobs.get(i).pop();
 							_blobs.remove(i);
@@ -210,9 +260,16 @@ public class MainSketch extends PApplet {
 		  }
 	  } //end loop
 	  
+	  
+	  /***
+	   * 
+	   */
 	  private void loopIslandState(){
-		  fill(200,200,200);
-		  ellipse(5,5,10,10);
+		  background(255,255,255); //make everything blank to render it
+		  image(img2,0,0);
+		  _islandMaker.checkOverlapping(_bubs);
+		  _islandMaker.display();
+		  drawBubbles();
 	  }
 	  
 	  
@@ -224,7 +281,21 @@ public class MainSketch extends PApplet {
 	  //update position + color of the player-bubbles
 	  private void drawBubbles() {
 		    
-		    for (Bubble b: _bubbles) {
+//		    for (Bubble b: _bubbles) {
+//		    	
+//		    	
+//		    	//b.bounceOff(_allMovableObjects);
+//		    	
+//		    	//check if bubble is colliding with other bubble
+////		    	if(b.collidesWith(defaultBubble)){
+////		    		fill(255,0,0);
+////		    	}
+////		    	else {
+////		    		noFill();
+////		    	}
+//		    	b.display();
+//		    }
+		  for (int i = 0; i < _bubs.size(); i++) {
 		    	
 		    	
 		    	//b.bounceOff(_allMovableObjects);
@@ -236,8 +307,28 @@ public class MainSketch extends PApplet {
 //		    	else {
 //		    		noFill();
 //		    	}
-		    	b.display();
+			  
+			  _bubs.get(i).display();
 		    }
+	  }
+	  
+	  
+	  private void HandleControllerInput(ArrayList<Bubble> bubbles) {
+		  int counter = 0;
+		  
+		  for(Bubble b: bubbles){
+			if(counter < 2) {
+
+				//do the controller-stuff to the bubbles
+				
+				counter++;
+			}
+			else {
+				break;
+			}
+			
+			
+		  }
 	  }
 	  
 	  

@@ -16,6 +16,13 @@ public class MovableObject {
 	float _speedX;
 	float _speedY;
 	
+	/**
+	 * 
+	 * @param p the parent applet
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param r the radius
+	 */
 	public MovableObject(PApplet p, float x, float y, float r) {
 		_parent = p;
 		_centroid = new PVector(x,y);

@@ -1,4 +1,5 @@
-package main;
+package old;
+import main.Bubble;
 import processing.core.PApplet;
 import processing.core.PVector;
 import tsps.Rectangle;
@@ -21,7 +22,7 @@ public class TspsPerson {
 		_boundingRect = new Rectangle();
 		_parent = p;
 		
-		_bubble = new Bubble(p, xCo, yCo);
+		_bubble = new main.Bubble(p, id, age,xCo, yCo);
 	}
 
 	public void updatePos(float centroidx, float centroidy) {

@@ -14,17 +14,18 @@ public class OSCHandler {
 	NetAddress myRemoteLocation;
 	
 	PApplet _p; //the parent that is calling the handler
-	HashMap<Integer, TspsPerson> _personList;
+	BubbleList _bubs; //synchronised List of bubbles
 	int _numPeople;
 	
 	ArrayList<Bubble> _bubbleList;
 	
-	public OSCHandler(PApplet parent){
+	public OSCHandler(PApplet parent, BubbleList bubs){
 		
 		_p = parent;
 		_numPeople = 0;
-		_personList = new HashMap<Integer, TspsPerson>();
-		_bubbleList = new ArrayList<Bubble>();
+//		_personList = new HashMap<Integer, TspsPerson>();
+		
+		_bubs = bubs;
 		
 		// start oscP5, telling it to listen for incoming messages at port 5001 */
 		oscP5 = new OscP5(this,12000); 
@@ -36,7 +37,7 @@ public class OSCHandler {
 	
 	
 	/**
-	 * This method is called, everytime an OSCMessage is received
+	 * This method is called by oscP5 (?), everytime an OSCMessage is received
 	 * @param oscMessage
 	 */
 	void oscEvent(OscMessage oscMessage) {
@@ -44,7 +45,7 @@ public class OSCHandler {
 			
 			try{
 				
-				//filter the messgage for type, then deal with infor
+				//filter the message for type, then deal with infor
 				
 				if(oscMessage.checkAddrPattern("/TSPS/scene")){
 					_numPeople = oscMessage.get(1).intValue(); // number of people
@@ -66,8 +67,10 @@ public class OSCHandler {
 					float centroidy 			= oscMessage.get(4).floatValue();
 //					_p.println("pos: " + centroidx + ", " + centroidy);
 					
-					TspsPerson p  = new TspsPerson(_p, id, age, centroidx, centroidy);
-					_personList.put(id, p);
+//					TspsPerson p  = new TspsPerson(_p, id, age, centroidx, centroidy);
+//					_personList.put(id, p);
+					Bubble b  = new Bubble(_p, id, age, centroidx, centroidy);
+					_bubs.add(b);
 
 					_p.println("PERSON ENTERED: " + id);
 				}
@@ -80,25 +83,28 @@ public class OSCHandler {
 					float centroidx 			= oscMessage.get(3).floatValue();
 					float centroidy 			= oscMessage.get(4).floatValue();
 					
-					TspsPerson p = _personList.get(id);
-					p.updatePos(centroidx, centroidy);
+
+					for(int i = 0; i < _bubs.size(); i++){
+						if(_bubs.get(i).id == id){
+							_bubs.get(i).update(centroidx, centroidy);
+							break;
+						}
+					}
 					
 				}
 
 				if(oscMessage.checkAddrPattern("/TSPS/personWillLeave/")){
 					int id 						= oscMessage.get(0).intValue();
-					_personList.remove(id);
+					
+					for(int i = 0; i < _bubs.size(); i++){
+						if(_bubs.get(i).id == id){
+							_bubs.remove(i);
+							break;
+						}
+					}
 					
 					_p.println("PERSON LEFT: " + id);
 				}
-				
-				
-				
-//				
-//				//println(id + "/" + age + "/"  + centroidx +"/" +centroidy);
-//				
-//				_p.println(oscMessage.addrPattern()); //personWillLeave
-				
 			}
 			catch (Exception e) {
 				//_p.println("EXCEPTION THROOOOOOOOOWN");
@@ -120,20 +126,11 @@ public class OSCHandler {
 	 * 
 	 * @return a List of Persons, that have been detected
 	 */
-	public ArrayList<TspsPerson> getPeopleList() {
-		ArrayList<TspsPerson> valuesList = new ArrayList<TspsPerson>(_personList.values());
-		return  valuesList;
-	}
-	
-	public ArrayList<Bubble> getBubbleList() {
-		
-		_bubbleList = new ArrayList<Bubble>();
-		
-		for(TspsPerson p: getPeopleList()) {
-			_bubbleList.add(p._bubble);
-		}
-		return _bubbleList;
-	}
+//	public ArrayList<Bubble> getBubbleList() {
+////		ArrayList<TspsPerson> valuesList = new ArrayList<TspsPerson>(_personList.values());
+//		ArrayList<Bubble> valuesList = new ArrayList<Bubble>(_bubbleMap.values());
+//		return  valuesList;
+//	}
 	
 	
 	

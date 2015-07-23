@@ -1,4 +1,4 @@
-package main;
+package old;
 import processing.core.PApplet;
 
 public class Stripe {
