@@ -22,7 +22,7 @@ public class TspsPerson {
 		_boundingRect = new Rectangle();
 		_parent = p;
 		
-		_bubble = new main.Bubble(p, id, age,xCo, yCo);
+//		_bubble = new main.Bubble(p, id, age,xCo, yCo);
 	}
 
 	public void updatePos(float centroidx, float centroidy) {

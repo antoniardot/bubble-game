@@ -46,6 +46,25 @@ public class MovableObject {
 	}
 	
 	
+	/***
+	 * 
+	 * @param other
+	 * @param distance
+	 * @return
+	 */
+	public boolean isCloseTo(MovableObject other, float distance) {
+		float deltaZ = _centroid.dist(other._centroid); 
+		double mindistance = _radius + other._radius + distance;
+		
+		if( deltaZ < mindistance) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	
 	/**
 	 * this checks if the moveableObject collides with any other given moveable object
 	 * if so, those objects, that have speed will bounce of in the other direction
@@ -87,5 +106,16 @@ public class MovableObject {
         _speedY -= ay;
         other._speedX += ax;
         other._speedY += ay;
+	}
+	
+	public boolean isCentredWith(MovableObject other, float errorMargin) {
+			
+			if(_centroid.dist(other._centroid) < errorMargin){
+				return true;
+			}
+			else {
+				return false;
+			}
+		
 	}
 }

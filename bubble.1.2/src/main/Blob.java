@@ -9,8 +9,8 @@ public class Blob extends MovableObject{
 	
 	int _index;
 //	java.awt.Color _fill = new Color(166,60,95);
-	java.awt.Color _fill = new Color(58,60,123);
-	java.awt.Color _stroke = new Color(196,97,18);
+	java.awt.Color _fill = new Color(196,97,18);
+	java.awt.Color _stroke = new Color(0);
 //	ArrayList<Blob> _otherBlobs;
 	
 	
@@ -31,7 +31,7 @@ public class Blob extends MovableObject{
 	public void display(){
 //		_parent.noFill();
 		_parent.fill(_fill.getRed(),_fill.getGreen(),_fill.getBlue());
-		_parent.strokeWeight(2);
+		_parent.strokeWeight(3);
 		_parent.stroke(_stroke.getRed(),_stroke.getGreen(),_stroke.getBlue());
 		_parent.ellipse(_centroid.x, _centroid.y, _radius, _radius);
 	}

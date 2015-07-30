@@ -18,14 +18,16 @@ public class OSCHandler {
 	int _numPeople;
 	
 	ArrayList<Bubble> _bubbleList;
+	ColorScheme _scheme;
 	
-	public OSCHandler(PApplet parent, BubbleList bubs){
+	public OSCHandler(PApplet parent, BubbleList bubs, ColorScheme s){
 		
 		_p = parent;
 		_numPeople = 0;
 //		_personList = new HashMap<Integer, TspsPerson>();
 		
 		_bubs = bubs;
+		_scheme = s;
 		
 		// start oscP5, telling it to listen for incoming messages at port 5001 */
 		oscP5 = new OscP5(this,12000); 
@@ -69,7 +71,7 @@ public class OSCHandler {
 					
 //					TspsPerson p  = new TspsPerson(_p, id, age, centroidx, centroidy);
 //					_personList.put(id, p);
-					Bubble b  = new Bubble(_p, id, age, centroidx, centroidy);
+					Bubble b  = new Bubble(_p, id, age, centroidx, centroidy,_scheme);
 					_bubs.add(b);
 
 					_p.println("PERSON ENTERED: " + id);
